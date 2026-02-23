@@ -1,34 +1,41 @@
 pipeline {
     agent any
-    
+
+    tools {
+        maven 'Maven'   // Must match name in Global Tool Configuration
+    }
+
+    environment {
+        SONAR_HOST_URL = 'http://localhost:9000'
+    }
+
     stages {
-        stage('Build') {
+
+        stage('Clean & Build') {
             steps {
-                bat 'mvn -B -DskipTests clean package'
+                bat 'mvn clean install'
             }
         }
-//         stage('Sonar-Report') {
-//             steps {
-//             sh 'mvn sonar:sonar \
-//   -Dsonar.projectKey=jenkins_project \
-//   -Dsonar.host.url=http://localhost:9000 \
-//   -Dsonar.login=5f09ded7e5db4d0ea0dcfd937c181af706e60475'
-//             }
-//         }
-        stage('Test') { 
+
+        stage('SonarQube Analysis') {
             steps {
-                bat 'mvn test' 
-            }
-            post {
-                always {
-                    junit 'target/surefire-reports/*.xml' 
+                withCredentials([string(credentialsId: 'sonar-token', variable: 'SONAR_TOKEN')]) {
+                    bat """
+                    mvn sonar:sonar ^
+                    -Dsonar.host.url=%SONAR_HOST_URL% ^
+                    -Dsonar.token=%SONAR_TOKEN%
+                    """
                 }
             }
         }
-        stage('Sonar-Report') {
-            steps {
-                bat 'mvn clean install sonar:sonar -Dsonar.host.url=http://localhost:9000 -Dsonar.analysis.mode=publish'
-            }
+    }
+
+    post {
+        success {
+            echo 'BUILD SUCCESS 🚀'
+        }
+        failure {
+            echo 'BUILD FAILED ❌'
         }
     }
 }
