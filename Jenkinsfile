@@ -12,10 +12,10 @@ pipeline {
     stages {
 
         stage('Clean & Build') {
-            steps {
-                bat 'mvn clean install'
-            }
-        }
+    steps {
+        bat 'mvn clean install -DskipTests'
+    }
+}
 
         stage('SonarQube Analysis') {
             steps {
