@@ -9,6 +9,8 @@ java -jar target/puppet-webapp-<VERSION>.jar
 ```
 Change made for pull request by @notsarthak
 
+Version 2.0
+
 
 
 
