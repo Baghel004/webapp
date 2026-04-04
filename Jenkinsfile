@@ -2,7 +2,7 @@ pipeline {
     agent any
 
     tools {
-        maven 'Maven'   // Must match name in Global Tool Configuration
+        maven 'Maven'
     }
 
     environment {
@@ -12,10 +12,22 @@ pipeline {
     stages {
 
         stage('Clean & Build') {
-    steps {
-        bat 'mvn clean install -DskipTests'
-    }
-}
+            steps {
+                bat 'mvn clean install -DskipTests'
+            }
+        }
+
+        // ✅ TEST STAGE (YOU MISSED THIS)
+        stage('Test') {
+            steps {
+                bat 'mvn test'
+            }
+            post {
+                always {
+                    junit '**/target/surefire-reports/*.xml'
+                }
+            }
+        }
 
         stage('SonarQube Analysis') {
             steps {
@@ -28,14 +40,21 @@ pipeline {
                 }
             }
         }
+
+        // ✅ DEPLOY STAGE (ASSIGNMENT PART)
+        stage('Deploy') {
+            steps {
+                bat 'C:\\deployment\\deployment.bat'
+            }
+        }
     }
 
     post {
         success {
-            echo 'BUILD SUCCESS 🚀'
+            echo 'BUILD + TEST + DEPLOY SUCCESS 🚀'
         }
         failure {
-            echo 'BUILD FAILED ❌'
+            echo 'PIPELINE FAILED ❌'
         }
     }
 }
